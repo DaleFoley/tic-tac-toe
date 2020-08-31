@@ -11,10 +11,10 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-    renderSquare(i) {
+    renderSquare(i, col, row) {
         return (
             <Square value={this.props.squares[i]}
-                    onClick={() => this.props.onClick(i)}
+                    onClick={() => this.props.onClick(i, col, row)}
             />
         );
     }
@@ -23,19 +23,19 @@ class Board extends React.Component {
         return (
             <div>
                 <div className="board-row">
-                    {this.renderSquare(0)}
-                    {this.renderSquare(1)}
-                    {this.renderSquare(2)}
+                    {this.renderSquare(0, 0, 0)}
+                    {this.renderSquare(1, 1, 0)}
+                    {this.renderSquare(2, 2, 0)}
                 </div>
                 <div className="board-row">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
+                    {this.renderSquare(3, 0, 1)}
+                    {this.renderSquare(4, 1, 1)}
+                    {this.renderSquare(5, 2, 1)}
                 </div>
                 <div className="board-row">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
+                    {this.renderSquare(6, 0, 2)}
+                    {this.renderSquare(7, 1, 2)}
+                    {this.renderSquare(8, 2, 2)}
                 </div>
             </div>
         );
@@ -48,21 +48,25 @@ class Game extends React.Component {
 
         this.state = {
             history: [{
-                squares: Array(9).fill(null),
+                squares: [Array(9).fill(null), 0, 0],
             }],
             xIsNext: true,
             stepNumber: 0,
         }
     }
 
-    handleClick(i) {
+    handleClick(i, col, row) {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
-        const squares = current.squares.slice();
-        if(calculateWinner(squares) || squares[i]) {
+        const squares = cloneArray(current.squares);
+        if(calculateWinner(squares) || squares[0][i]) {
             return;
         }
-        squares[i] = this.state.xIsNext ? 'X' : 'O';
+
+        squares[0][i] = this.state.xIsNext ? 'X' : 'O';
+        squares[1] = col;
+        squares[2] = row;
+
         this.setState(
             {
                 history: history.concat([{
@@ -83,7 +87,7 @@ class Game extends React.Component {
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
-        const winner = calculateWinner(current.squares);
+        const winner = calculateWinner(current.squares[0]);
         let status;
         if(winner) {
             status = 'Winner: ' + winner;
@@ -93,19 +97,28 @@ class Game extends React.Component {
         }
 
         const moves = history.map((step, move) => {
-           const desc = move ? 'Go to move #' + move : 'Go to game start';
-           return (
-               <li key={move}>
-                   <button onClick={() => this.jumpTo(move)}>{desc}</button>
-               </li>
-           )
+            const isFirstMove = move === 0;
+            let desc = 'Go to move #' + move;
+            let locationInformation = step.squares[1] + ', ' + step.squares[2];
+
+            if(isFirstMove) {
+                desc = 'Go to game start';
+                locationInformation = '';
+            }
+
+            return (
+                <li key={move}>
+                    <button onClick={() => this.jumpTo(move)}>{desc}</button>{locationInformation}
+                </li>
+            )
         });
+
         return (
             <div className="game">
                 <div className="game-board">
                     <Board
-                        squares={current.squares}
-                        onClick={(i) => this.handleClick(i)}
+                        squares={current.squares[0]}
+                        onClick={(i, col, row) => this.handleClick(i, col, row)}
                     />
                 </div>
                 <div className="game-info">
@@ -142,4 +155,10 @@ function calculateWinner(squares) {
         }
     }
     return null;
+}
+
+function cloneArray(arr) {
+    //Thanks to this website, detailing an easy way to deep clone multi-dimensional arrays:
+    //https://www.freecodecamp.org/news/how-to-clone-an-array-in-javascript-1d3183468f6a/
+    return JSON.parse(JSON.stringify(arr));
 }

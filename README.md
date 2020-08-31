@@ -1,3 +1,5 @@
+This project is the basic tutorial found on the react website [https://reactjs.org/tutorial/tutorial.html](https://reactjs.org/tutorial/tutorial.html). Which includes the additional improvements. 
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
