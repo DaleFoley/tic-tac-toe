@@ -77,11 +77,19 @@ class Game extends React.Component {
             });
     }
 
-    jumpTo(step) {
+    jumpTo(step, x) {
         this.setState({
             stepNumber: step,
             xIsNext: (step % 2) === 0,
         });
+
+        //Might be cleaner to use selector syntax here? I.e getElementById..
+        let selectedButton = x.currentTarget;
+        let selectedListItem = selectedButton.parentElement;
+        let orderedList = selectedListItem.parentElement;
+
+        setFontWeightToHTMLCollection(orderedList, "normal");
+        selectedListItem.style.fontWeight = "bold";
     }
 
     render() {
@@ -108,7 +116,7 @@ class Game extends React.Component {
 
             return (
                 <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>{locationInformation}
+                    <button onClick={(x) => this.jumpTo(move, x)}>{desc}</button>{locationInformation}
                 </li>
             )
         });
@@ -161,4 +169,11 @@ function cloneArray(arr) {
     //Thanks to this website, detailing an easy way to deep clone multi-dimensional arrays:
     //https://www.freecodecamp.org/news/how-to-clone-an-array-in-javascript-1d3183468f6a/
     return JSON.parse(JSON.stringify(arr));
+}
+
+function setFontWeightToHTMLCollection(html, weight) {
+    let children = html.children;
+    for (let i = 0; i < children.length; i++) {
+        children[i].style.fontWeight = weight;
+    }
 }
