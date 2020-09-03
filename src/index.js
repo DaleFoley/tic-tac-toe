@@ -101,7 +101,27 @@ class Game extends React.Component {
             status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
         }
 
-        const moves = history.map((step, move) => {
+        const moves = this.getMoves(history);
+
+        return (
+            <div className="game">
+                <div className="game-board">
+                    <Board
+                        squares={current.squares[0]}
+                        onClick={(i, col, row) => this.handleClick(i, col, row)}
+                    />
+                </div>
+                <div className="game-info">
+                    <div>{status}</div>
+                    <ol>{moves}</ol>
+                    <button onClick={() => this.reverseTimeTravelList()}>Toggle Order Asc/Desc</button>
+                </div>
+            </div>
+        );
+    }
+
+    getMoves(history) {
+        let moves = history.map((step, move) => {
             const isFirstMove = move === 0;
             let desc = 'Go to move #' + move;
             let locationInformation = step.squares[1] + ', ' + step.squares[2];
@@ -118,20 +138,17 @@ class Game extends React.Component {
             )
         });
 
-        return (
-            <div className="game">
-                <div className="game-board">
-                    <Board
-                        squares={current.squares[0]}
-                        onClick={(i, col, row) => this.handleClick(i, col, row)}
-                    />
-                </div>
-                <div className="game-info">
-                    <div>{status}</div>
-                    <ol>{moves}</ol>
-                </div>
-            </div>
-        );
+        if (this.state.isTimeTravelListReversed) {
+            moves = moves.reverse();
+        }
+
+        return moves;
+    }
+
+    reverseTimeTravelList() {
+        this.setState({
+            isTimeTravelListReversed: !this.state.isTimeTravelListReversed,
+        });
     }
 }
 
