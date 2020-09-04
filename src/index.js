@@ -64,18 +64,28 @@ class Game extends React.Component {
                 squares: [Array(9).fill(null), 0, 0],
             }],
             xIsNext: true,
-            stepNumber: 0
+            stepNumber: 0,
+            isGameFinished: false,
+            winner: ''
         }
     }
 
     handleClick(i, col, row) {
+        if(this.state.isGameFinished) {return;}
+
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = cloneArray(current.squares);
 
+        if(squares[0][i] !== null) {
+            return;
+        }
+
         squares[0][i] = this.state.xIsNext ? 'X' : 'O';
         squares[1] = col;
         squares[2] = row;
+
+        const winner = calculateWinner(squares[0]);
 
         this.setState(
             {
@@ -84,6 +94,8 @@ class Game extends React.Component {
                 }]),
                 stepNumber: history.length,
                 xIsNext: !this.state.xIsNext,
+                isGameFinished: winner !== null,
+                winner: winner
             });
     }
 
@@ -105,12 +117,15 @@ class Game extends React.Component {
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
-        const winner = calculateWinner(current.squares[0]);
 
         let winningSquareIndexes = null;
         let status;
-        if(winner) {
-            status = 'Winner: ' + winner;
+
+        if(this.state.stepNumber === 9 && this.state.winner === null) {
+            status = 'Draw - No Winners.';
+        }
+        else if(this.state.winner) {
+            status = 'Winner: ' + this.state.winner;
             winningSquareIndexes = getWinningSquares(current.squares[0]); //TODO: Avoid re-calculating this.
         }
         else {
